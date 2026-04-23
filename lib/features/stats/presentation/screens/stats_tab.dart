@@ -13,9 +13,9 @@ class StatsTab extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           children: [
             const SizedBox(height: 8),
-            const Text('Your progress', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600, letterSpacing: -0.6, height: 1.15)),
+            const Text('Tu progreso', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600, letterSpacing: -0.6, height: 1.15)),
             const SizedBox(height: 4),
-            const Text('Last 30 days', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+            const Text('Últimos 30 días', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
             const SizedBox(height: 16),
             // Overview row
             Row(
@@ -45,7 +45,7 @@ class StatsTab extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('LEVEL PROGRESS', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 0.5)),
+                  const Text('PROGRESO POR NIVEL', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 0.5)),
                   const SizedBox(height: 16),
                   for (int i = 0; i < _levelProgress.length; i++) ...[
                     Row(
@@ -79,8 +79,8 @@ class StatsTab extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: const [
-                      Text('WEEKLY ACTIVITY', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 0.5)),
-                      Text('cards / day', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                      Text('ACTIVIDAD SEMANAL', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 0.5)),
+                      Text('tarjetas / día', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                     ],
                   ),
                   const SizedBox(height: 18),
@@ -132,7 +132,7 @@ class StatsTab extends StatelessWidget {
                 children: [
                   const Padding(
                     padding: EdgeInsets.fromLTRB(20, 14, 20, 8),
-                    child: Text('RECENT SESSIONS', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 0.5)),
+                    child: Text('SESIONES RECIENTES', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 0.5)),
                   ),
                   for (final s in _recentSessions)
                     Container(
@@ -157,14 +157,14 @@ class StatsTab extends StatelessWidget {
   }
 }
 
-const _overviewStats = [('248', 'Words learned'), ('34', 'Sessions'), ('21', 'Days active')];
+const _overviewStats = [('248', 'Palabras aprendidas'), ('34', 'Sesiones'), ('21', 'Días activos')];
 
 const _levelProgress = [('A1', 1.0), ('A2', 0.6), ('B1', 0.2), ('B2', 0.0)];
 
-const _weeklyData = [('M', 0.62), ('T', 0.90), ('W', 0.48), ('T', 0.28), ('F', 0.78), ('S', 1.00), ('S', 0.20)];
+const _weeklyData = [('L', 0.62), ('M', 0.90), ('X', 0.48), ('J', 0.28), ('V', 0.78), ('S', 1.00), ('D', 0.20)];
 
 const _recentSessions = [
-  ('Today', 'A2 · Daily routines', '18 cards'),
-  ('Yesterday', 'A1 · Everyday objects', '12 cards'),
-  ('Apr 21', 'B1 · Work & travel', '24 cards'),
+  ('Hoy', 'A2 · Daily routines', '18 tarjetas'),
+  ('Ayer', 'A1 · Everyday objects', '12 tarjetas'),
+  ('21 abr', 'B1 · Work & travel', '24 tarjetas'),
 ];

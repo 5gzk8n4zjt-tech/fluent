@@ -11,10 +11,10 @@ class _Level {
 }
 
 const _levels = [
-  _Level('A1', 'Beginner', 'I know a few words and common phrases.'),
-  _Level('A2', 'Elementary', 'I can handle simple, everyday conversations.'),
-  _Level('B1', 'Intermediate', 'I can discuss familiar topics at work or travel.'),
-  _Level('B2', 'Upper-intermediate', 'I can argue a point and follow complex speech.'),
+  _Level('A1', 'Principiante', 'Conozco algunas palabras y frases comunes.'),
+  _Level('A2', 'Elemental', 'Puedo mantener conversaciones simples del día a día.'),
+  _Level('B1', 'Intermedio', 'Puedo hablar de temas cotidianos en el trabajo o de viaje.'),
+  _Level('B2', 'Intermedio alto', 'Puedo debatir ideas y entender discursos complejos.'),
 ];
 
 class OnboardingLevelScreen extends StatefulWidget {
@@ -59,9 +59,9 @@ class _OnboardingLevelScreenState extends State<OnboardingLevelScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Choose your level', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w600, letterSpacing: -0.6, height: 1.15)),
+                    Text('Elige tu nivel', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w600, letterSpacing: -0.6, height: 1.15)),
                     SizedBox(height: 6),
-                    Text('You can change this anytime in settings.', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+                    Text('Puedes cambiarlo cuando quieras en los ajustes.', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
                   ],
                 ),
               ),
@@ -129,7 +129,7 @@ class _OnboardingLevelScreenState extends State<OnboardingLevelScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              FluentButton(label: 'Start learning', onPressed: () => context.go('/home')),
+              FluentButton(label: 'Empezar a aprender', onPressed: () => context.go('/home')),
             ],
           ),
         ),

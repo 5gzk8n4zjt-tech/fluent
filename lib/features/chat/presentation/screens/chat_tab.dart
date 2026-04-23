@@ -45,7 +45,7 @@ class ChatTab extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
                 children: [
                   const Center(
-                    child: Text('TODAY · 9:41', style: TextStyle(fontSize: 11, color: AppColors.textSecondary, letterSpacing: 0.5)),
+                    child: Text('HOY · 9:41', style: TextStyle(fontSize: 11, color: AppColors.textSecondary, letterSpacing: 0.5)),
                   ),
                   const SizedBox(height: 12),
                   for (final msg in _messages) ...[
@@ -59,7 +59,7 @@ class ChatTab extends StatelessWidget {
                     constraints: const BoxConstraints(maxWidth: 220),
                     decoration: BoxDecoration(color: AppColors.textPrimary, borderRadius: BorderRadius.circular(8)),
                     child: const Text(
-                      'Underlined words come from your decks. Tap to review.',
+                      'Las palabras subrayadas son de tus mazos. Tócalas para repasar.',
                       style: TextStyle(fontSize: 12, color: Colors.white, letterSpacing: -0.1, height: 1.4),
                     ),
                   ),
@@ -79,7 +79,7 @@ class ChatTab extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
                       decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(24)),
-                      child: const Text('Write or speak…', style: TextStyle(fontSize: 15, color: AppColors.textSecondary)),
+                      child: const Text('Escribe o habla…', style: TextStyle(fontSize: 15, color: AppColors.textSecondary)),
                     ),
                   ),
                   const SizedBox(width: 10),

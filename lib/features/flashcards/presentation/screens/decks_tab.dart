@@ -37,11 +37,11 @@ class _DecksTabState extends State<DecksTab> {
             ListView(
               padding: const EdgeInsets.fromLTRB(24, 8, 24, 100),
               children: [
-                const Text('Your decks', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600, letterSpacing: -0.6, height: 1.15)),
+                const Text('Tus mazos', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600, letterSpacing: -0.6, height: 1.15)),
                 const SizedBox(height: 4),
-                const Text('Choose a level to study', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+                const Text('Elige un nivel para estudiar', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
                 const SizedBox(height: 20),
-                const Text('PREDEFINED DECKS', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 0.6)),
+                const Text('MAZOS PREDEFINIDOS', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 0.6)),
                 const SizedBox(height: 12),
                 for (int i = 0; i < _decks.length; i++) ...[
                   GestureDetector(
@@ -61,7 +61,7 @@ class _DecksTabState extends State<DecksTab> {
                               children: [
                                 Text(_decks[i].topic, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, letterSpacing: -0.1)),
                                 const SizedBox(height: 2),
-                                Text('${_decks[i].count} cards', style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                                Text('${_decks[i].count} tarjetas', style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
                               ],
                             ),
                           ),
@@ -85,7 +85,7 @@ class _DecksTabState extends State<DecksTab> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(sub, style: const TextStyle(fontSize: 14, color: AppColors.textPrimary)),
-                            const Text('16 cards', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                            const Text('16 tarjetas', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                           ],
                         ),
                       ),
@@ -93,7 +93,7 @@ class _DecksTabState extends State<DecksTab> {
                   const SizedBox(height: 10),
                 ],
                 const SizedBox(height: 8),
-                const Text('MY DECKS', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 0.6)),
+                const Text('MIS MAZOS', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 0.6)),
                 const SizedBox(height: 12),
                 _DashedContainer(
                   child: Column(
@@ -105,7 +105,7 @@ class _DecksTabState extends State<DecksTab> {
                         child: const Icon(Icons.add, color: AppColors.textSecondary, size: 16),
                       ),
                       const SizedBox(height: 8),
-                      const Text('Create your first deck', style: TextStyle(fontSize: 14, color: AppColors.textSecondary, fontWeight: FontWeight.w500)),
+                      const Text('Crea tu primer mazo', style: TextStyle(fontSize: 14, color: AppColors.textSecondary, fontWeight: FontWeight.w500)),
                     ],
                   ),
                 ),

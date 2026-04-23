@@ -134,7 +134,7 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
                                       : const [
                                           Text('••••••', style: TextStyle(letterSpacing: 5, color: Color(0xFFC0C0BA), fontSize: 15)),
                                           SizedBox(width: 8),
-                                          Text('Tap to reveal', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                                          Text('Toca para revelar', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
                                         ],
                                 ),
                               ),
@@ -149,7 +149,7 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
             ),
             const Padding(
               padding: EdgeInsets.only(top: 18, bottom: 10),
-              child: Text('How well did you remember this?', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+              child: Text('¿Qué tan bien lo recordaste?', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
             ),
             // Answer buttons
             Padding(
@@ -178,10 +178,10 @@ class _AnswerData {
 }
 
 const _answerButtons = [
-  _AnswerData('Again', '<1m'),
-  _AnswerData('Hard', '6m'),
-  _AnswerData('Good', '10m'),
-  _AnswerData('Easy', '4d', filled: true),
+  _AnswerData('Otra vez', '<1m'),
+  _AnswerData('Difícil', '6m'),
+  _AnswerData('Bien', '10m'),
+  _AnswerData('Fácil', '4d', filled: true),
 ];
 
 class _AnswerButton extends StatelessWidget {

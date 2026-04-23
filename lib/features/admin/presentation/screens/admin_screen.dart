@@ -23,14 +23,14 @@ class AdminScreen extends StatelessWidget {
             const SizedBox(height: 8),
             const Text('Admin', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600, letterSpacing: -0.6, height: 1.15)),
             const SizedBox(height: 4),
-            const Text('Fluent dashboard', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+            const Text('Panel de Fluent', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
             const SizedBox(height: 28),
             // Decks header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('PREDEFINED DECKS', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 0.5)),
-                Text('${_decks.length} total', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                const Text('MAZOS PREDEFINIDOS', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 0.5)),
+                Text('${_decks.length} en total', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
               ],
             ),
             const SizedBox(height: 12),
@@ -62,7 +62,7 @@ class AdminScreen extends StatelessWidget {
                                   ],
                                 ),
                                 const SizedBox(height: 2),
-                                Text('${_decks[i].$3} cards', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                                Text('${_decks[i].$3} tarjetas', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                               ],
                             ),
                           ),
@@ -85,15 +85,15 @@ class AdminScreen extends StatelessWidget {
                 minimumSize: const Size(double.infinity, 48),
               ),
               icon: const Icon(Icons.add, size: 16),
-              label: const Text('Add deck', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+              label: const Text('Añadir mazo', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
             ),
             const SizedBox(height: 28),
             // Users header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: const [
-                Text('USERS', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 0.5)),
-                Text('142 total', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                Text('USUARIOS', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 0.5)),
+                Text('142 en total', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
               ],
             ),
             const SizedBox(height: 12),
@@ -128,9 +128,9 @@ class AdminScreen extends StatelessWidget {
               spacing: 10,
               runSpacing: 10,
               children: const [
-                _StatPill('Total users', '142'),
-                _StatPill('Active today', '38'),
-                _StatPill('Cards reviewed', '1,204'),
+                _StatPill('Usuarios totales', '142'),
+                _StatPill('Activos hoy', '38'),
+                _StatPill('Tarjetas revisadas', '1.204'),
               ],
             ),
           ],
@@ -149,9 +149,9 @@ const _decks = [
 
 const _users = [
   ('alex@fluent.app', 'Apr 12', 'Admin'),
-  ('marco.b@gmail.com', 'Apr 18', 'User'),
-  ('sara.lin@proton.me', 'Apr 19', 'User'),
-  ('josh.wu@hey.com', 'Apr 21', 'User'),
+  ('marco.b@gmail.com', 'Apr 18', 'Usuario'),
+  ('sara.lin@proton.me', 'Apr 19', 'Usuario'),
+  ('josh.wu@hey.com', 'Apr 21', 'Usuario'),
 ];
 
 class _StatPill extends StatelessWidget {

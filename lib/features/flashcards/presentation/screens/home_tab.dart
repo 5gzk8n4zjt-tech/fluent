@@ -16,9 +16,9 @@ class HomeTab extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           children: [
             const SizedBox(height: 8),
-            const Text('Good morning, Alex', style: TextStyle(fontSize: 14, color: AppColors.textSecondary, fontWeight: FontWeight.w500)),
+            const Text('Buenos días, Alex', style: TextStyle(fontSize: 14, color: AppColors.textSecondary, fontWeight: FontWeight.w500)),
             const SizedBox(height: 4),
-            const Text('Ready to learn?', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600, letterSpacing: -0.6, height: 1.15)),
+            const Text('¿Listo para aprender?', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600, letterSpacing: -0.6, height: 1.15)),
             const SizedBox(height: 24),
             // Study session card
             FluentCard(
@@ -29,10 +29,10 @@ class HomeTab extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('STUDY SESSION', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 0.5)),
+                      const Text('SESIÓN DE ESTUDIO', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 0.5)),
                       const FluentPill(
                         variant: FluentPillVariant.streak,
-                        child: Text('▲  7 day streak', style: TextStyle(fontSize: 11)),
+                        child: Text('▲  7 días seguidos', style: TextStyle(fontSize: 11)),
                       ),
                     ],
                   ),
@@ -41,14 +41,14 @@ class HomeTab extends StatelessWidget {
                     text: const TextSpan(
                       children: [
                         TextSpan(text: '12 ', style: TextStyle(fontSize: 34, fontWeight: FontWeight.w600, letterSpacing: -0.8, color: AppColors.textPrimary)),
-                        TextSpan(text: 'cards due', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
+                        TextSpan(text: 'tarjetas pendientes', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
                       ],
                     ),
                   ),
                   const SizedBox(height: 4),
-                  const Text('Across 2 decks · ~6 min', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+                  const Text('En 2 mazos · ~6 min', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
                   const SizedBox(height: 18),
-                  FluentButton(label: 'Start studying', onPressed: () => context.go('/study/a1-everyday')),
+                  FluentButton(label: 'Empieza a estudiar', onPressed: () => context.go('/study/a1-everyday')),
                 ],
               ),
             ),
@@ -61,17 +61,17 @@ class HomeTab extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: const [
-                      Text('CONVERSATION', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 0.5)),
-                      Text("Today's topic", style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                      Text('CONVERSACIÓN', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 0.5)),
+                      Text('Tema de hoy', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                     ],
                   ),
                   const SizedBox(height: 12),
                   const Text('Ordering food at a restaurant', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, letterSpacing: -0.2)),
                   const SizedBox(height: 6),
-                  const Text('Practice asking about dishes, allergies, and the bill.', style: TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.5)),
+                  const Text('Practica cómo pedir platos, preguntar sobre alergias y pedir la cuenta.', style: TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.5)),
                   const SizedBox(height: 16),
                   FluentButton(
-                    label: 'Start chat',
+                    label: 'Iniciar conversación',
                     onPressed: () => context.go('/chat'),
                     variant: FluentButtonVariant.secondary,
                   ),
@@ -86,8 +86,8 @@ class HomeTab extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: const [
-                      Text('THIS WEEK', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 0.5)),
-                      Text('5 / 7 days', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
+                      Text('ESTA SEMANA', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 0.5)),
+                      Text('5 / 7 días', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -95,13 +95,13 @@ class HomeTab extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       for (final day in [
+                        (d: 'L', on: true, today: false),
                         (d: 'M', on: true, today: false),
-                        (d: 'T', on: true, today: false),
-                        (d: 'W', on: true, today: false),
-                        (d: 'T', on: false, today: false),
-                        (d: 'F', on: true, today: false),
+                        (d: 'X', on: true, today: false),
+                        (d: 'J', on: false, today: false),
+                        (d: 'V', on: true, today: false),
                         (d: 'S', on: true, today: false),
-                        (d: 'S', on: false, today: true),
+                        (d: 'D', on: false, today: true),
                       ])
                         Column(
                           children: [

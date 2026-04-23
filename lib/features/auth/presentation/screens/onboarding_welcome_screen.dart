@@ -49,12 +49,12 @@ class OnboardingWelcomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               const Text(
-                'Flashcards that adapt to you. Conversations that feel real.',
+                'Tarjetas que se adaptan a ti. Conversaciones que se sienten reales.',
                 style: TextStyle(fontSize: 17, color: AppColors.textSecondary, height: 1.5, letterSpacing: -0.2),
               ),
               const Spacer(),
               FluentButton(
-                label: 'Get started',
+                label: 'Empezar',
                 onPressed: () => context.go('/onboarding/account'),
               ),
               const SizedBox(height: 14),
@@ -65,9 +65,9 @@ class OnboardingWelcomeScreen extends StatelessWidget {
                     text: const TextSpan(
                       style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
                       children: [
-                        TextSpan(text: 'Already have an account? '),
+                        TextSpan(text: '¿Ya tienes cuenta? '),
                         TextSpan(
-                          text: 'Sign in',
+                          text: 'Inicia sesión',
                           style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600),
                         ),
                       ],
