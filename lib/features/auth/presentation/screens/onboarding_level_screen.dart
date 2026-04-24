@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/supabase_client.dart';
 import '../../../../shared/widgets/fluent_button.dart';
+import '../providers/auth_provider.dart';
 
 class _Level {
   const _Level(this.code, this.name, this.desc);
@@ -17,15 +20,43 @@ const _levels = [
   _Level('B2', 'Intermedio alto', 'Puedo debatir ideas y entender discursos complejos.'),
 ];
 
-class OnboardingLevelScreen extends StatefulWidget {
+class OnboardingLevelScreen extends ConsumerStatefulWidget {
   const OnboardingLevelScreen({super.key});
 
   @override
-  State<OnboardingLevelScreen> createState() => _OnboardingLevelScreenState();
+  ConsumerState<OnboardingLevelScreen> createState() =>
+      _OnboardingLevelScreenState();
 }
 
-class _OnboardingLevelScreenState extends State<OnboardingLevelScreen> {
+class _OnboardingLevelScreenState
+    extends ConsumerState<OnboardingLevelScreen> {
   int _selected = 1;
+  bool _isLoading = false;
+  String? _error;
+
+  Future<void> _finish() async {
+    final userId = supabase.auth.currentUser?.id;
+    if (userId == null) return;
+
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      await ref
+          .read(authRepositoryProvider)
+          .updateUserLevel(userId, _levels[_selected].code);
+      if (mounted) context.go('/home');
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _error = 'No se pudo guardar el nivel. Inténtalo de nuevo.';
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,20 +68,28 @@ class _OnboardingLevelScreenState extends State<OnboardingLevelScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                children: List.generate(3, (i) => Expanded(
-                  child: Container(
-                    height: 3,
-                    margin: i < 2 ? const EdgeInsets.only(right: 6) : EdgeInsets.zero,
-                    decoration: BoxDecoration(color: AppColors.textPrimary, borderRadius: BorderRadius.circular(2)),
-                  ),
-                )),
+                children: List.generate(
+                    3,
+                    (i) => Expanded(
+                          child: Container(
+                            height: 3,
+                            margin: i < 2
+                                ? const EdgeInsets.only(right: 6)
+                                : EdgeInsets.zero,
+                            decoration: BoxDecoration(
+                              color: AppColors.textPrimary,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                        )),
               ),
               const SizedBox(height: 32),
               GestureDetector(
                 onTap: () => context.pop(),
                 child: const Padding(
                   padding: EdgeInsets.only(left: 8),
-                  child: Icon(Icons.arrow_back_ios, size: 20, color: AppColors.textPrimary),
+                  child: Icon(Icons.arrow_back_ios,
+                      size: 20, color: AppColors.textPrimary),
                 ),
               ),
               const SizedBox(height: 20),
@@ -59,9 +98,18 @@ class _OnboardingLevelScreenState extends State<OnboardingLevelScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Elige tu nivel', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w600, letterSpacing: -0.6, height: 1.15)),
+                    Text('Elige tu nivel',
+                        style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: -0.6,
+                            height: 1.15)),
                     SizedBox(height: 6),
-                    Text('Puedes cambiarlo cuando quieras en los ajustes.', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+                    Text(
+                        'Puedes cambiarlo cuando quieras en los ajustes.',
+                        style: TextStyle(
+                            fontSize: 14,
+                            color: AppColors.textSecondary)),
                   ],
                 ),
               ),
@@ -76,12 +124,15 @@ class _OnboardingLevelScreenState extends State<OnboardingLevelScreen> {
                     return GestureDetector(
                       onTap: () => setState(() => _selected = i),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 18, vertical: 16),
                         decoration: BoxDecoration(
                           color: AppColors.background,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: isSelected ? AppColors.textPrimary : AppColors.border,
+                            color: isSelected
+                                ? AppColors.textPrimary
+                                : AppColors.border,
                             width: isSelected ? 1.5 : 1,
                           ),
                         ),
@@ -91,13 +142,22 @@ class _OnboardingLevelScreenState extends State<OnboardingLevelScreen> {
                               width: 38,
                               height: 38,
                               decoration: BoxDecoration(
-                                color: isSelected ? AppColors.textPrimary : AppColors.surface,
+                                color: isSelected
+                                    ? AppColors.textPrimary
+                                    : AppColors.surface,
                                 borderRadius: BorderRadius.circular(9),
                               ),
                               child: Center(
                                 child: Text(
                                   level.code,
-                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: isSelected ? Colors.white : AppColors.textPrimary, letterSpacing: -0.1),
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : AppColors.textPrimary,
+                                    letterSpacing: -0.1,
+                                  ),
                                 ),
                               ),
                             ),
@@ -106,9 +166,17 @@ class _OnboardingLevelScreenState extends State<OnboardingLevelScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(level.name, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, letterSpacing: -0.1)),
+                                  Text(level.name,
+                                      style: const TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w600,
+                                          letterSpacing: -0.1)),
                                   const SizedBox(height: 2),
-                                  Text(level.desc, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.35)),
+                                  Text(level.desc,
+                                      style: const TextStyle(
+                                          fontSize: 13,
+                                          color: AppColors.textSecondary,
+                                          height: 1.35)),
                                 ],
                               ),
                             ),
@@ -117,8 +185,12 @@ class _OnboardingLevelScreenState extends State<OnboardingLevelScreen> {
                               Container(
                                 width: 20,
                                 height: 20,
-                                decoration: BoxDecoration(color: AppColors.textPrimary, borderRadius: BorderRadius.circular(10)),
-                                child: const Icon(Icons.check, size: 12, color: Colors.white),
+                                decoration: BoxDecoration(
+                                  color: AppColors.textPrimary,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Icon(Icons.check,
+                                    size: 12, color: Colors.white),
                               ),
                             ],
                           ],
@@ -128,8 +200,17 @@ class _OnboardingLevelScreenState extends State<OnboardingLevelScreen> {
                   },
                 ),
               ),
+              if (_error != null) ...[
+                const SizedBox(height: 12),
+                Text(_error!,
+                    style: const TextStyle(
+                        fontSize: 13, color: Color(0xFFCC3333))),
+              ],
               const SizedBox(height: 20),
-              FluentButton(label: 'Empezar a aprender', onPressed: () => context.go('/home')),
+              FluentButton(
+                label: _isLoading ? 'Guardando...' : 'Empezar a aprender',
+                onPressed: _isLoading ? null : _finish,
+              ),
             ],
           ),
         ),

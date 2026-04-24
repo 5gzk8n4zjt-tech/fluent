@@ -18,15 +18,16 @@ Future<void> main() async {
   runApp(const ProviderScope(child: FluentApp()));
 }
 
-class FluentApp extends StatelessWidget {
+class FluentApp extends ConsumerWidget {
   const FluentApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
     return MaterialApp.router(
       title: 'Fluent',
       theme: AppTheme.light,
-      routerConfig: appRouter,
+      routerConfig: router,
       debugShowCheckedModeBanner: false,
     );
   }
