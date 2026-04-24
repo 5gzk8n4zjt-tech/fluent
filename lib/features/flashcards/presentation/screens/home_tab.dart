@@ -1,22 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/widgets/fluent_button.dart';
 import '../../../../shared/widgets/fluent_card.dart';
 import '../../../../shared/widgets/fluent_pill.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 
-class HomeTab extends StatelessWidget {
+class HomeTab extends ConsumerWidget {
   const HomeTab({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           children: [
             const SizedBox(height: 8),
-            const Text('Buenos días, Alex', style: TextStyle(fontSize: 14, color: AppColors.textSecondary, fontWeight: FontWeight.w500)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Buenos días, Alex', style: TextStyle(fontSize: 14, color: AppColors.textSecondary, fontWeight: FontWeight.w500)),
+                GestureDetector(
+                  onTap: () async {
+                    await ref.read(authNotifierProvider.notifier).signOut();
+                  },
+                  child: const Icon(Icons.logout, size: 20, color: AppColors.textSecondary),
+                ),
+              ],
+            ),
             const SizedBox(height: 4),
             const Text('¿Listo para aprender?', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600, letterSpacing: -0.6, height: 1.15)),
             const SizedBox(height: 24),

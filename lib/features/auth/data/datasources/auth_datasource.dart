@@ -15,11 +15,12 @@ class AuthDatasource {
   Future<Map<String, dynamic>?> fetchUser(String userId) =>
       supabase.from('users').select().eq('id', userId).maybeSingle();
 
-  Future<void> insertUser(String id, String email) =>
+  Future<void> insertUser(String id, String email, [String? fullName, String? role]) =>
       supabase.from('users').insert({
         'id': id,
         'email': email,
-        'role': 'user',
+        'full_name': fullName ?? email.split('@')[0],
+        'role': role ?? 'user',
         'created_at': DateTime.now().toIso8601String(),
       });
 

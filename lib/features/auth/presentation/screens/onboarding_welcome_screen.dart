@@ -60,7 +60,7 @@ class OnboardingWelcomeScreen extends StatelessWidget {
               const SizedBox(height: 14),
               Center(
                 child: GestureDetector(
-                  onTap: () => context.go('/onboarding/account'),
+                  onTap: () => context.go('/onboarding/account?isSignIn=true'),
                   child: RichText(
                     text: const TextSpan(
                       style: TextStyle(fontSize: 14, color: AppColors.textSecondary),

@@ -82,7 +82,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/onboarding/account',
-        builder: (context, state) => const OnboardingAccountScreen(),
+        builder: (context, state) => OnboardingAccountScreen(
+          initialSignIn: state.uri.queryParameters['isSignIn'] == 'true',
+        ),
       ),
       GoRoute(
         path: '/onboarding/level',

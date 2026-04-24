@@ -7,7 +7,9 @@ import '../../domain/entities/user_entity.dart';
 import '../providers/auth_provider.dart';
 
 class OnboardingAccountScreen extends ConsumerStatefulWidget {
-  const OnboardingAccountScreen({super.key});
+  const OnboardingAccountScreen({super.key, this.initialSignIn = false});
+
+  final bool initialSignIn;
 
   @override
   ConsumerState<OnboardingAccountScreen> createState() =>
@@ -18,7 +20,13 @@ class _OnboardingAccountScreenState
     extends ConsumerState<OnboardingAccountScreen> {
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
-  bool _isSignIn = false;
+  late bool _isSignIn;
+
+  @override
+  void initState() {
+    super.initState();
+    _isSignIn = widget.initialSignIn;
+  }
 
   @override
   void dispose() {
@@ -129,7 +137,7 @@ class _OnboardingAccountScreenState
               ),
               const SizedBox(height: 12),
               GestureDetector(
-                onTap: () => context.go('/onboarding'),
+                onTap: () => setState(() => _isSignIn = !_isSignIn),
                 child: Center(
                   child: Text(
                     _isSignIn
