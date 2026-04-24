@@ -67,7 +67,7 @@ class _OnboardingAccountScreenState
               _StepIndicator(filled: 2, total: 3),
               const SizedBox(height: 40),
               GestureDetector(
-                onTap: () => context.pop(),
+                onTap: () => context.go('/onboarding'),
                 child: const Icon(Icons.arrow_back_ios,
                     size: 20, color: AppColors.textPrimary),
               ),
@@ -129,10 +129,7 @@ class _OnboardingAccountScreenState
               ),
               const SizedBox(height: 12),
               GestureDetector(
-                onTap: () {
-                  setState(() => _isSignIn = !_isSignIn);
-                  ref.read(authNotifierProvider.notifier).reset();
-                },
+                onTap: () => context.go('/onboarding'),
                 child: Center(
                   child: Text(
                     _isSignIn
