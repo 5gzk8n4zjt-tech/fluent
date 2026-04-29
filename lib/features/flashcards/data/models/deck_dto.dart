@@ -22,6 +22,8 @@ class DeckDTO {
   final String createdAt;
   final int flashcardCount;
 
+  factory DeckDTO.fromJson(Map<String, dynamic> json) => DeckDTO.fromMap(json);
+
   factory DeckDTO.fromMap(Map<String, dynamic> map) => DeckDTO(
         id: map['id'] as String,
         title: map['title'] as String,

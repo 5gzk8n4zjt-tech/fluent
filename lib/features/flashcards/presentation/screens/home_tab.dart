@@ -7,7 +7,7 @@ import '../../../../shared/widgets/fluent_button.dart';
 import '../../../../shared/widgets/fluent_card.dart';
 import '../../../../shared/widgets/fluent_pill.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
-import '../providers/flashcard_provider.dart';
+import '../providers/flashcard_providers.dart';
 
 // Reemplaza con el UUID real del mazo en Supabase
 const _studyDeckId = 'a1-everyday';

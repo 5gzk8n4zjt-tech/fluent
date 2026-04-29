@@ -19,6 +19,8 @@ class FlashcardDTO {
   final String? imageUrl;
   final String createdAt;
 
+  factory FlashcardDTO.fromJson(Map<String, dynamic> json) => FlashcardDTO.fromMap(json);
+
   factory FlashcardDTO.fromMap(Map<String, dynamic> map) => FlashcardDTO(
         id: map['id'] as String,
         deckId: map['deck_id'] as String,

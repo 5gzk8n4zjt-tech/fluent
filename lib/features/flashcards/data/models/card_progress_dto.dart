@@ -21,6 +21,8 @@ class CardProgressDTO {
   final String nextReview;
   final String? lastReviewed;
 
+  factory CardProgressDTO.fromJson(Map<String, dynamic> json) => CardProgressDTO.fromMap(json);
+
   factory CardProgressDTO.fromMap(Map<String, dynamic> map) => CardProgressDTO(
         id: map['id'] as String,
         userId: map['user_id'] as String,

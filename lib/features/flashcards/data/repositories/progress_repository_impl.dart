@@ -1,30 +1,28 @@
 import '../../domain/entities/card_progress_entity.dart';
 import '../../domain/repositories/progress_repository.dart';
-import '../datasources/supabase_flashcard_datasource.dart';
+import '../datasources/flashcard_datasource.dart';
 import '../models/card_progress_dto.dart';
 
 class ProgressRepositoryImpl implements ProgressRepository {
-  ProgressRepositoryImpl() : _ds = SupabaseFlashcardDatasource();
+  ProgressRepositoryImpl(this._ds);
 
-  final SupabaseFlashcardDatasource _ds;
+  final FlashcardDataSource _ds;
 
   @override
   Future<List<CardProgressEntity>> getDueCards(
       String userId, String deckId) async {
     final list = await _ds.getDueCards(userId, deckId);
-    return list.map((m) => CardProgressDTO.fromMap(m).toEntity()).toList();
+    return list.map((m) => CardProgressDTO.fromJson(m).toEntity()).toList();
   }
 
   @override
-  Future<void> updateProgress(CardProgressEntity progress) async {
-    await _ds.updateProgress(CardProgressDTO.fromEntity(progress));
-  }
+  Future<void> updateProgress(CardProgressEntity progress) =>
+      _ds.updateProgress(progress.id, CardProgressDTO.fromEntity(progress));
 
   @override
   Future<CardProgressEntity?> getProgressByCard(
       String userId, String flashcardId) async {
     final map = await _ds.getProgressByCard(userId, flashcardId);
-    if (map == null) return null;
-    return CardProgressDTO.fromMap(map).toEntity();
+    return map != null ? CardProgressDTO.fromJson(map).toEntity() : null;
   }
 }

@@ -3,15 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/supabase_client.dart';
-import '../../domain/entities/card_progress_entity.dart';
 import '../../domain/entities/flashcard_entity.dart';
-import '../../domain/services/srs_algorithm.dart';
 import '../../domain/value_objects/level.dart';
-import '../providers/flashcard_provider.dart';
+import '../providers/flashcard_providers.dart';
 
 class FlashcardScreen extends ConsumerStatefulWidget {
   const FlashcardScreen({super.key, required this.deckId});
-
   final String deckId;
 
   @override
@@ -19,86 +16,85 @@ class FlashcardScreen extends ConsumerStatefulWidget {
 }
 
 class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
-  bool _revealed = false;
-  int _currentIndex = 0;
-  bool _isComplete = false;
-  final _srs = SRSAlgorithm();
+  bool _sessionLoaded = false;
 
-  String? get _userId => supabase.auth.currentUser?.id;
-
-  Future<void> _grade(
-    int grade,
-    FlashcardEntity flashcard,
-    CardProgressEntity progress,
-  ) async {
-    final updated = _srs.calculateNextReview(progress, grade);
-    await ref.read(progressRepositoryProvider).updateProgress(updated);
-
-    final cards = ref
-        .read(dueCardsProvider(
-            (userId: _userId!, deckId: widget.deckId)))
-        .valueOrNull ?? [];
-
-    setState(() {
-      if (_currentIndex < cards.length - 1) {
-        _currentIndex++;
-        _revealed = false;
-      } else {
-        _isComplete = true;
-      }
+  @override
+  void initState() {
+    super.initState();
+    // Reset session state on entry
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(cardProgressNotifier.notifier).reset();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final userId = _userId;
+    final userId = supabase.auth.currentUser?.id;
     if (userId == null) {
       return const Scaffold(body: Center(child: Text('No autenticado')));
     }
 
     final deckAsync = ref.watch(currentDeckProvider(widget.deckId));
-    final cardsAsync = ref.watch(
+    final dueAsync = ref.watch(
         dueCardsProvider((userId: userId, deckId: widget.deckId)));
+    final session = ref.watch(cardProgressNotifier);
 
-    if (cardsAsync.isLoading || deckAsync.isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+    // Load session once due cards arrive
+    if (!_sessionLoaded && dueAsync.valueOrNull != null) {
+      _sessionLoaded = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref
+            .read(cardProgressNotifier.notifier)
+            .loadSession(dueAsync.valueOrNull!);
+      });
     }
 
-    if (cardsAsync.hasError) {
+    if (dueAsync.isLoading || deckAsync.isLoading) {
+      return const Scaffold(
+          body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (dueAsync.hasError) {
       return Scaffold(
         body: Center(
-          child: Text('Error: ${cardsAsync.error}',
+          child: Text('Error: ${dueAsync.error}',
               style: const TextStyle(color: Colors.red)),
         ),
       );
     }
 
-    final cards = cardsAsync.valueOrNull ?? [];
     final deck = deckAsync.valueOrNull;
+    final cards = session.cards;
 
-    if (cards.isEmpty || _isComplete) {
+    // No cards or session complete
+    if (cards.isEmpty || session.isComplete) {
       return _CompletionScreen(
         deckTitle: deck?.title ?? widget.deckId,
-        reviewedCount: _isComplete ? _currentIndex + 1 : 0,
-        onBack: () => context.pop(),
+        reviewedCount: session.reviewedCount,
+        onBack: () {
+          ref.read(cardProgressNotifier.notifier).reset();
+          context.pop();
+        },
       );
     }
 
-    final card = cards[_currentIndex];
+    final card = session.currentCard!;
     final total = cards.length;
 
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
+            // Header
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
               child: Row(
                 children: [
                   GestureDetector(
-                    onTap: () => context.pop(),
+                    onTap: () {
+                      ref.read(cardProgressNotifier.notifier).reset();
+                      context.pop();
+                    },
                     child: const Icon(Icons.arrow_back_ios,
                         size: 20, color: AppColors.textPrimary),
                   ),
@@ -113,7 +109,7 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
                     ),
                   ),
                   Text(
-                    '${_currentIndex + 1} / $total',
+                    '${session.currentIndex + 1} / $total',
                     style: const TextStyle(
                       fontSize: 13,
                       color: AppColors.textSecondary,
@@ -123,12 +119,13 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
                 ],
               ),
             ),
+            // Progress bar
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(2),
                 child: LinearProgressIndicator(
-                  value: (_currentIndex + 1) / total,
+                  value: (session.currentIndex + 1) / total,
                   minHeight: 3,
                   backgroundColor: const Color(0xFFEFEFEC),
                   valueColor: const AlwaysStoppedAnimation<Color>(
@@ -137,17 +134,20 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
               ),
             ),
             const SizedBox(height: 20),
+            // Card face
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: _FlashcardFace(
                   flashcard: card.flashcard,
-                  revealed: _revealed,
-                  onReveal: () => setState(() => _revealed = true),
+                  revealed: session.isRevealed,
+                  onReveal: () =>
+                      ref.read(cardProgressNotifier.notifier).reveal(),
                 ),
               ),
             ),
-            if (_revealed) ...[
+            // Grade buttons (only when revealed)
+            if (session.isRevealed) ...[
               const Padding(
                 padding: EdgeInsets.only(top: 18, bottom: 10),
                 child: Text('¿Qué tan bien lo recordaste?',
@@ -162,11 +162,10 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
                       Expanded(
                         child: _GradeButton(
                           data: _gradeOptions[i],
-                          onTap: () => _grade(
-                            _gradeOptions[i].grade,
-                            card.flashcard,
-                            card.progress,
-                          ),
+                          disabled: session.isSaving,
+                          onTap: () => ref
+                              .read(cardProgressNotifier.notifier)
+                              .grade(_gradeOptions[i].grade),
                         ),
                       ),
                       if (i < _gradeOptions.length - 1)
@@ -184,6 +183,7 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
   }
 }
 
+// ── Card face widget ────────────────────────────────────────────────────────
 class _FlashcardFace extends StatelessWidget {
   const _FlashcardFace({
     required this.flashcard,
@@ -205,6 +205,7 @@ class _FlashcardFace extends StatelessWidget {
       ),
       child: Column(
         children: [
+          // Image / placeholder
           Expanded(
             child: Container(
               decoration: const BoxDecoration(
@@ -217,8 +218,7 @@ class _FlashcardFace extends StatelessWidget {
                       borderRadius: const BorderRadius.vertical(
                           top: Radius.circular(11)),
                       child: Image.network(flashcard.imageUrl!,
-                          fit: BoxFit.cover,
-                          width: double.infinity),
+                          fit: BoxFit.cover, width: double.infinity),
                     )
                   : Center(
                       child: Text(
@@ -233,6 +233,7 @@ class _FlashcardFace extends StatelessWidget {
             ),
           ),
           const Divider(height: 1, thickness: 1, color: AppColors.border),
+          // Word + reveal
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
             child: Column(
@@ -247,7 +248,8 @@ class _FlashcardFace extends StatelessWidget {
                 const SizedBox(height: 16),
                 GestureDetector(
                   onTap: revealed ? null : onReveal,
-                  child: Container(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
                     padding: const EdgeInsets.symmetric(
                         horizontal: 18, vertical: 10),
                     decoration: BoxDecoration(
@@ -259,13 +261,11 @@ class _FlashcardFace extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: revealed
                           ? [
-                              Text(
-                                flashcard.translation,
-                                style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textPrimary),
-                              )
+                              Text(flashcard.translation,
+                                  style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textPrimary))
                             ]
                           : const [
                               Text('••••••',
@@ -291,6 +291,7 @@ class _FlashcardFace extends StatelessWidget {
   }
 }
 
+// ── Completion screen ───────────────────────────────────────────────────────
 class _CompletionScreen extends StatelessWidget {
   const _CompletionScreen({
     required this.deckTitle,
@@ -304,7 +305,7 @@ class _CompletionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isEmpty = reviewedCount == 0;
+    final hasCards = reviewedCount > 0;
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -313,15 +314,11 @@ class _CompletionScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(),
-              Text(
-                isEmpty ? '🎉' : '✅',
-                style: const TextStyle(fontSize: 56),
-              ),
+              Text(hasCards ? '✅' : '🎉',
+                  style: const TextStyle(fontSize: 56)),
               const SizedBox(height: 24),
               Text(
-                isEmpty
-                    ? '¡Al día!'
-                    : 'Sesión completada',
+                hasCards ? 'Sesión completada' : '¡Al día!',
                 style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w600,
@@ -329,9 +326,9 @@ class _CompletionScreen extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                isEmpty
-                    ? 'No hay tarjetas pendientes en "$deckTitle" por ahora.'
-                    : 'Revisaste $reviewedCount tarjeta${reviewedCount != 1 ? 's' : ''} de "$deckTitle".',
+                hasCards
+                    ? 'Revisaste $reviewedCount tarjeta${reviewedCount != 1 ? 's' : ''} de "$deckTitle".'
+                    : 'No hay tarjetas pendientes en "$deckTitle" por ahora.',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                     fontSize: 16,
@@ -348,14 +345,12 @@ class _CompletionScreen extends StatelessWidget {
                     color: AppColors.textPrimary,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Text(
-                    'Volver',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600),
-                  ),
+                  child: const Text('Volver',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600)),
                 ),
               ),
             ],
@@ -366,6 +361,7 @@ class _CompletionScreen extends StatelessWidget {
   }
 }
 
+// ── Grade options ───────────────────────────────────────────────────────────
 class _GradeData {
   const _GradeData(this.label, this.sub, this.grade, {this.filled = false});
   final String label;
@@ -382,40 +378,43 @@ const _gradeOptions = [
 ];
 
 class _GradeButton extends StatelessWidget {
-  const _GradeButton({required this.data, required this.onTap});
+  const _GradeButton({
+    required this.data,
+    required this.onTap,
+    this.disabled = false,
+  });
   final _GradeData data;
   final VoidCallback onTap;
+  final bool disabled;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: data.filled ? AppColors.textPrimary : Colors.transparent,
-          border: Border.all(
-              color:
-                  data.filled ? AppColors.textPrimary : AppColors.border),
-          borderRadius: BorderRadius.circular(24),
-        ),
-        child: Column(
-          children: [
-            Text(data.label,
-                style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: data.filled
-                        ? Colors.white
-                        : AppColors.textPrimary)),
-            const SizedBox(height: 2),
-            Text(data.sub,
-                style: TextStyle(
-                    fontSize: 10,
-                    color: data.filled
-                        ? Colors.white70
-                        : AppColors.textSecondary)),
-          ],
+      onTap: disabled ? null : onTap,
+      child: Opacity(
+        opacity: disabled ? 0.5 : 1.0,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: data.filled ? AppColors.textPrimary : Colors.transparent,
+            border: Border.all(
+                color: data.filled ? AppColors.textPrimary : AppColors.border),
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Column(
+            children: [
+              Text(data.label,
+                  style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: data.filled ? Colors.white : AppColors.textPrimary)),
+              const SizedBox(height: 2),
+              Text(data.sub,
+                  style: TextStyle(
+                      fontSize: 10,
+                      color: data.filled ? Colors.white70 : AppColors.textSecondary)),
+            ],
+          ),
         ),
       ),
     );

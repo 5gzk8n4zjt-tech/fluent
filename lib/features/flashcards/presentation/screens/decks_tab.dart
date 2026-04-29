@@ -1,115 +1,127 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/widgets/fluent_card.dart';
 import '../../../../shared/widgets/fluent_pill.dart';
+import '../../domain/entities/deck_entity.dart';
+import '../../domain/value_objects/level.dart';
+import '../providers/flashcard_providers.dart';
 
-class _Deck {
-  const _Deck(this.level, this.topic, this.count, this.subs);
-  final String level;
-  final String topic;
-  final int count;
-  final List<String> subs;
-}
-
-const _decks = [
-  _Deck('A1', 'Everyday objects', 48, ['Home & kitchen', 'Clothes', 'Food basics']),
-  _Deck('A2', 'Daily routines', 64, []),
-  _Deck('B1', 'Work & travel', 96, []),
-  _Deck('B2', 'Opinions & debate', 112, []),
-];
-
-class DecksTab extends StatefulWidget {
+class DecksTab extends ConsumerStatefulWidget {
   const DecksTab({super.key});
 
   @override
-  State<DecksTab> createState() => _DecksTabState();
+  ConsumerState<DecksTab> createState() => _DecksTabState();
 }
 
-class _DecksTabState extends State<DecksTab> {
-  int _expanded = 0;
+class _DecksTabState extends ConsumerState<DecksTab> {
+  String? _expandedId;
 
   @override
   Widget build(BuildContext context) {
+    final decksAsync = ref.watch(allDecksProvider);
+
     return Scaffold(
       body: SafeArea(
         child: Stack(
           children: [
-            ListView(
-              padding: const EdgeInsets.fromLTRB(24, 8, 24, 100),
-              children: [
-                const Text('Tus mazos', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600, letterSpacing: -0.6, height: 1.15)),
-                const SizedBox(height: 4),
-                const Text('Elige un nivel para estudiar', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
-                const SizedBox(height: 20),
-                const Text('MAZOS PREDEFINIDOS', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 0.6)),
-                const SizedBox(height: 12),
-                for (int i = 0; i < _decks.length; i++) ...[
-                  GestureDetector(
-                    onTap: () => setState(() => _expanded = _expanded == i ? -1 : i),
-                    child: FluentCard(
-                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-                      child: Row(
-                        children: [
-                          FluentPill(
-                            variant: FluentPillVariant.dark,
-                            child: Text(_decks[i].level, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                          ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(_decks[i].topic, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, letterSpacing: -0.1)),
-                                const SizedBox(height: 2),
-                                Text('${_decks[i].count} tarjetas', style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-                              ],
-                            ),
-                          ),
-                          Icon(
-                            _expanded == i ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_right,
+            decksAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => Center(
+                  child: Text('Error al cargar mazos',
+                      style: const TextStyle(color: AppColors.textSecondary))),
+              data: (decks) {
+                final predefined =
+                    decks.where((d) => d.isPredefined).toList();
+                final mine = decks.where((d) => !d.isPredefined).toList();
+
+                return ListView(
+                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 100),
+                  children: [
+                    const Text('Tus mazos',
+                        style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: -0.6,
+                            height: 1.15)),
+                    const SizedBox(height: 4),
+                    const Text('Elige un nivel para estudiar',
+                        style: TextStyle(
+                            fontSize: 14, color: AppColors.textSecondary)),
+                    const SizedBox(height: 20),
+                    const Text('MAZOS PREDEFINIDOS',
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
                             color: AppColors.textSecondary,
-                            size: 18,
+                            letterSpacing: 0.6)),
+                    const SizedBox(height: 12),
+                    if (predefined.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.only(bottom: 16),
+                        child: Text('No hay mazos predefinidos aún.',
+                            style: TextStyle(
+                                fontSize: 13,
+                                color: AppColors.textSecondary)),
+                      )
+                    else
+                      for (final deck in predefined) ...[
+                        _DeckCard(
+                          deck: deck,
+                          isExpanded: _expandedId == deck.id,
+                          onTap: () => setState(() =>
+                              _expandedId =
+                                  _expandedId == deck.id ? null : deck.id),
+                          onStudy: () => context.go('/study/${deck.id}'),
+                        ),
+                        const SizedBox(height: 10),
+                      ],
+                    const SizedBox(height: 8),
+                    const Text('MIS MAZOS',
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textSecondary,
+                            letterSpacing: 0.6)),
+                    const SizedBox(height: 12),
+                    if (mine.isNotEmpty) ...[
+                      for (final deck in mine) ...[
+                        _DeckCard(
+                          deck: deck,
+                          isExpanded: _expandedId == deck.id,
+                          onTap: () => setState(() =>
+                              _expandedId =
+                                  _expandedId == deck.id ? null : deck.id),
+                          onStudy: () => context.go('/study/${deck.id}'),
+                        ),
+                        const SizedBox(height: 10),
+                      ],
+                    ],
+                    _DashedContainer(
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                                color: AppColors.surface,
+                                borderRadius: BorderRadius.circular(16)),
+                            child: const Icon(Icons.add,
+                                color: AppColors.textSecondary, size: 16),
                           ),
+                          const SizedBox(height: 8),
+                          const Text('Crea tu primer mazo',
+                              style: TextStyle(
+                                  fontSize: 14,
+                                  color: AppColors.textSecondary,
+                                  fontWeight: FontWeight.w500)),
                         ],
                       ),
                     ),
-                  ),
-                  if (_expanded == i && _decks[i].subs.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    for (final sub in _decks[i].subs)
-                      Container(
-                        padding: const EdgeInsets.fromLTRB(18, 11, 14, 11),
-                        margin: const EdgeInsets.only(left: 16),
-                        decoration: const BoxDecoration(border: Border(left: BorderSide(color: AppColors.border))),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(sub, style: const TextStyle(fontSize: 14, color: AppColors.textPrimary)),
-                            const Text('16 tarjetas', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                          ],
-                        ),
-                      ),
                   ],
-                  const SizedBox(height: 10),
-                ],
-                const SizedBox(height: 8),
-                const Text('MIS MAZOS', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary, letterSpacing: 0.6)),
-                const SizedBox(height: 12),
-                _DashedContainer(
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(16)),
-                        child: const Icon(Icons.add, color: AppColors.textSecondary, size: 16),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text('Crea tu primer mazo', style: TextStyle(fontSize: 14, color: AppColors.textSecondary, fontWeight: FontWeight.w500)),
-                    ],
-                  ),
-                ),
-              ],
+                );
+              },
             ),
             Positioned(
               bottom: 20,
@@ -119,7 +131,9 @@ class _DecksTabState extends State<DecksTab> {
                 child: Container(
                   width: 56,
                   height: 56,
-                  decoration: BoxDecoration(color: AppColors.textPrimary, borderRadius: BorderRadius.circular(28)),
+                  decoration: BoxDecoration(
+                      color: AppColors.textPrimary,
+                      borderRadius: BorderRadius.circular(28)),
                   child: const Icon(Icons.add, color: Colors.white),
                 ),
               ),
@@ -127,6 +141,104 @@ class _DecksTabState extends State<DecksTab> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _DeckCard extends StatelessWidget {
+  const _DeckCard({
+    required this.deck,
+    required this.isExpanded,
+    required this.onTap,
+    required this.onStudy,
+  });
+
+  final DeckEntity deck;
+  final bool isExpanded;
+  final VoidCallback onTap;
+  final VoidCallback onStudy;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: onTap,
+          child: FluentCard(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            child: Row(
+              children: [
+                FluentPill(
+                  variant: FluentPillVariant.dark,
+                  child: Text(deck.level.code,
+                      style: const TextStyle(
+                          fontSize: 12, fontWeight: FontWeight.w600)),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(deck.title,
+                          style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: -0.1)),
+                      const SizedBox(height: 2),
+                      Text(deck.topic,
+                          style: const TextStyle(
+                              fontSize: 13, color: AppColors.textSecondary)),
+                    ],
+                  ),
+                ),
+                Icon(
+                  isExpanded
+                      ? Icons.keyboard_arrow_down
+                      : Icons.keyboard_arrow_right,
+                  color: AppColors.textSecondary,
+                  size: 18,
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (isExpanded) ...[
+          const SizedBox(height: 6),
+          Container(
+            margin: const EdgeInsets.only(left: 16),
+            padding: const EdgeInsets.fromLTRB(18, 12, 14, 12),
+            decoration: const BoxDecoration(
+                border: Border(
+                    left: BorderSide(color: AppColors.border))),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(deck.topic,
+                      style: const TextStyle(
+                          fontSize: 14, color: AppColors.textSecondary)),
+                ),
+                GestureDetector(
+                  onTap: onStudy,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 7),
+                    decoration: BoxDecoration(
+                      color: AppColors.textPrimary,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text('Estudiar',
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
