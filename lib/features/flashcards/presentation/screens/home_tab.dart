@@ -23,8 +23,27 @@ class HomeTab extends ConsumerWidget {
               children: [
                 const Text('Buenos días, Alex', style: TextStyle(fontSize: 14, color: AppColors.textSecondary, fontWeight: FontWeight.w500)),
                 GestureDetector(
-                  onTap: () async {
-                    await ref.read(authNotifierProvider.notifier).signOut();
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('¿Cerrar sesión?'),
+                        content: const Text('Se cerrará tu sesión en la app.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Cancelar', style: TextStyle(color: AppColors.textSecondary)),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              Navigator.pop(context);
+                              await ref.read(authNotifierProvider.notifier).signOut();
+                            },
+                            child: const Text('Cerrar sesión', style: TextStyle(color: Color(0xFFCC3333))),
+                          ),
+                        ],
+                      ),
+                    );
                   },
                   child: const Icon(Icons.logout, size: 20, color: AppColors.textSecondary),
                 ),
