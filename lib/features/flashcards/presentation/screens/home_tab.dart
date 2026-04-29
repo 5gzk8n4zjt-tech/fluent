@@ -2,16 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/supabase_client.dart';
 import '../../../../shared/widgets/fluent_button.dart';
 import '../../../../shared/widgets/fluent_card.dart';
 import '../../../../shared/widgets/fluent_pill.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../providers/flashcard_provider.dart';
+
+// Reemplaza con el UUID real del mazo en Supabase
+const _studyDeckId = 'a1-everyday';
 
 class HomeTab extends ConsumerWidget {
   const HomeTab({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final userId = supabase.auth.currentUser?.id;
+    final dueAsync = userId != null
+        ? ref.watch(dueCardsProvider((userId: userId, deckId: _studyDeckId)))
+        : null;
+    final dueCount = dueAsync?.valueOrNull?.length ?? 0;
+    final isDueLoading = dueAsync?.isLoading ?? true;
+
     return Scaffold(
       body: SafeArea(
         child: ListView(
@@ -70,17 +82,25 @@ class HomeTab extends ConsumerWidget {
                   ),
                   const SizedBox(height: 14),
                   RichText(
-                    text: const TextSpan(
+                    text: TextSpan(
                       children: [
-                        TextSpan(text: '12 ', style: TextStyle(fontSize: 34, fontWeight: FontWeight.w600, letterSpacing: -0.8, color: AppColors.textPrimary)),
-                        TextSpan(text: 'tarjetas pendientes', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
+                        TextSpan(text: isDueLoading ? '…' : '$dueCount ', style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w600, letterSpacing: -0.8, color: AppColors.textPrimary)),
+                        TextSpan(text: dueCount == 1 ? 'tarjeta pendiente' : 'tarjetas pendientes', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
                       ],
                     ),
                   ),
                   const SizedBox(height: 4),
-                  const Text('En 2 mazos · ~6 min', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+                  Text(
+                    dueCount == 0 && !isDueLoading
+                        ? '¡Todas las tarjetas estudiadas hoy!'
+                        : '~${(dueCount * 0.5).ceil()} min estimados',
+                    style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                  ),
                   const SizedBox(height: 18),
-                  FluentButton(label: 'Empieza a estudiar', onPressed: () => context.go('/study/a1-everyday')),
+                  FluentButton(
+                    label: dueCount == 0 && !isDueLoading ? 'Al día ✓' : 'Empieza a estudiar',
+                    onPressed: dueCount == 0 && !isDueLoading ? null : () => context.go('/study/$_studyDeckId'),
+                  ),
                 ],
               ),
             ),
