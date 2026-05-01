@@ -36,10 +36,12 @@ class AdminDataSource {
   Future<void> deleteDeck(String deckId) =>
       supabase.from('decks').delete().eq('id', deckId);
 
-  Future<List<Map<String, dynamic>>> getAllUsers() => supabase
-      .from('users')
-      .select('id, email, full_name, role, created_at')
-      .order('created_at', ascending: false);
+  Future<List<Map<String, dynamic>>> getAllUsers() async {
+    return await supabase
+        .from('users')
+        .select()
+        .order('created_at', ascending: false);
+  }
 
   Future<Map<String, dynamic>> getAdminStats() async {
     final todayUtc = DateTime.now().toUtc();
