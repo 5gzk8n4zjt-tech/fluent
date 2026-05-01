@@ -36,25 +36,51 @@ class _OnboardingAccountScreenState
   }
 
   Future<void> _submit() async {
+    print('DEBUG: _submit() llamado');
+    print('DEBUG: _isSignIn = $_isSignIn');
+    print('DEBUG: email = ${_emailCtrl.text}');
+    print('DEBUG: password = ${_passwordCtrl.text}');
+
     final email = _emailCtrl.text.trim();
     final password = _passwordCtrl.text;
-    if (email.isEmpty || password.isEmpty) return;
+    if (email.isEmpty || password.isEmpty) {
+      print('DEBUG: Email o password vacío, retornando');
+      return;
+    }
 
     final notifier = ref.read(authNotifierProvider.notifier);
-    final success = _isSignIn
-        ? await notifier.signIn(email, password)
-        : await notifier.signUp(email, password);
-
-    if (!success || !mounted) return;
+    if (_isSignIn) {
+      print('DEBUG: Llamando signIn...');
+      final success = await notifier.signIn(email, password);
+      print('DEBUG: signIn resultado = $success');
+      if (!success || !mounted) {
+        print('DEBUG: signIn falló o no mounted');
+        return;
+      }
+    } else {
+      print('DEBUG: Llamando signUp...');
+      final success = await notifier.signUp(email, password);
+      print('DEBUG: signUp resultado = $success');
+      if (!success || !mounted) {
+        print('DEBUG: signUp falló o no mounted');
+        return;
+      }
+    }
 
     final authState = ref.read(authNotifierProvider);
+    print('DEBUG: authState = $authState');
     if (authState is AuthSuccess) {
       final user = authState.user;
+      print('DEBUG: usuario loguedo = ${user.email}, level = ${user.level}, role = ${user.role}');
       if (_isSignIn && user.level != null) {
+        print('DEBUG: navegando a ${user.role == Role.admin ? '/admin' : '/home'}');
         context.go(user.role == Role.admin ? '/admin' : '/home');
       } else {
+        print('DEBUG: navegando a /onboarding/level');
         context.go('/onboarding/level');
       }
+    } else {
+      print('DEBUG: authState no es AuthSuccess');
     }
   }
 

@@ -1,3 +1,4 @@
+import '../../../../core/constants/supabase_client.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_datasource.dart';
@@ -19,18 +20,64 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<UserEntity> signIn(String email, String password) async {
-    final res = await _ds.signIn(email, password);
-    final user = res.user ?? (throw Exception('signIn returned null user'));
-    final data = await _ds.fetchUser(user.id);
+    print('DEBUG signIn: iniciando con email=$email');
 
-    if (data == null) {
-      await _ds.insertUser(user.id, email);
-      final newData = await _ds.fetchUser(user.id);
-      if (newData == null) throw Exception('Fallo al crear usuario');
-      return UserEntity.fromMap(newData);
+    try {
+      final response = await supabase.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+
+      print(
+          'DEBUG signIn: respuesta recibida — user.id=${response.user?.id}');
+
+      final user = response.user;
+      if (user == null) {
+        print('DEBUG signIn: user es NULL después de auth');
+        throw Exception('User is null after signin');
+      }
+
+      print('DEBUG signIn: leyendo usuario de tabla users...');
+      var fetchUser = await supabase
+          .from('users')
+          .select()
+          .eq('id', user.id)
+          .maybeSingle();
+
+      print('DEBUG signIn: fetchUser=$fetchUser');
+
+      if (fetchUser == null) {
+        try {
+          print(
+              'DEBUG signIn: usuario no en tabla, creando automáticamente...');
+          await supabase.from('users').insert({
+            'id': user.id,
+            'email': user.email,
+            'full_name': user.email!.split('@')[0],
+            'role': 'user',
+          });
+        } catch (e) {
+          // Si falla porque ya existe, ignorar y volver a leer
+          print(
+              'DEBUG signIn: insert falló (probable duplicate), intentando leer nuevamente...');
+        }
+
+        // Intentar leer de nuevo (puede que exista con otro ID)
+        fetchUser = await supabase
+            .from('users')
+            .select()
+            .eq('id', user.id)
+            .single();
+
+        print('DEBUG signIn: usuario encontrado por email — $fetchUser');
+      }
+
+      print('DEBUG signIn: retornando UserEntity');
+      return UserEntity.fromMap(fetchUser);
+    } catch (e) {
+      print('DEBUG signIn ERROR: $e');
+      rethrow;
     }
-
-    return UserEntity.fromMap(data);
   }
 
   @override
