@@ -56,6 +56,10 @@ class _RouterNotifier extends ChangeNotifier {
       return '/admin';
     }
 
+    if (user.role != Role.admin && loc.startsWith('/admin')) {
+      return '/home';
+    }
+
     return null;
   }
 }
