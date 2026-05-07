@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/datasources/chat_datasource.dart';
 import '../../data/repositories/chat_repository_impl.dart';
-import '../../data/services/gemini_service.dart';
+import '../../data/services/mistral_service.dart';
 import '../../domain/entities/chat_message_entity.dart';
 import '../../domain/repositories/chat_repository.dart';
 import '../../domain/services/ai_service.dart';
@@ -14,8 +14,14 @@ final chatDataSourceProvider = Provider<ChatDataSource>(
   (_) => ChatDataSource(),
 );
 
-final geminiServiceProvider = Provider<AIService>(
-  (_) => GeminiService(dotenv.env['GEMINI_API_KEY'] ?? ''),
+final mistralServiceProvider = Provider<AIService>(
+  (_) {
+    final apiKey = dotenv.env['MISTRAL_API_KEY'];
+    if (apiKey == null || apiKey.isEmpty) {
+      throw Exception('MISTRAL_API_KEY not found in .env');
+    }
+    return MistralService(apiKey);
+  },
 );
 
 final chatRepositoryProvider = Provider<ChatRepository>(
@@ -49,6 +55,7 @@ class ChatState {
     this.error,
     this.sessionId,
     this.topic = 'Ordering food at a restaurant',
+    this.userLevel = 'A1',
   });
 
   final List<ChatMessageEntity> messages;
@@ -57,6 +64,7 @@ class ChatState {
   final String? error;
   final String? sessionId;
   final String topic;
+  final String userLevel;
 
   bool get isReady => sessionId != null;
 
@@ -67,6 +75,7 @@ class ChatState {
     String? error,
     String? sessionId,
     String? topic,
+    String? userLevel,
   }) =>
       ChatState(
         messages: messages ?? this.messages,
@@ -75,6 +84,7 @@ class ChatState {
         error: error,
         sessionId: sessionId ?? this.sessionId,
         topic: topic ?? this.topic,
+        userLevel: userLevel ?? this.userLevel,
       );
 }
 
@@ -85,8 +95,9 @@ class ChatNotifier extends StateNotifier<ChatState> {
   final AIService _ai;
 
   Future<void> initSession(String userId,
-      {String topic = 'Ordering food at a restaurant'}) async {
-    state = ChatState(topic: topic);
+      {String topic = 'Ordering food at a restaurant',
+      String userLevel = 'A1'}) async {
+    state = ChatState(topic: topic, userLevel: userLevel);
     try {
       final session = await _repo.createSession(userId, topic);
       state = state.copyWith(sessionId: session.id, error: null);
@@ -112,6 +123,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
         messages: withUser,
         learnedWords: learnedWords,
         topic: state.topic,
+        userLevel: state.userLevel,
       );
 
       final aiMsg =
@@ -144,6 +156,6 @@ final chatNotifierProvider =
     StateNotifierProvider<ChatNotifier, ChatState>(
   (ref) => ChatNotifier(
     ref.watch(chatRepositoryProvider),
-    ref.watch(geminiServiceProvider),
+    ref.watch(mistralServiceProvider),
   ),
 );

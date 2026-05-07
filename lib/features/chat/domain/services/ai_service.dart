@@ -12,6 +12,7 @@ abstract class AIService {
     required List<ChatMessageEntity> messages,
     required List<String> learnedWords,
     required String topic,
+    required String userLevel,
   });
 
   /// Transcribes audio from [audioPath] to text.

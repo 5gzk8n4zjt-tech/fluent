@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/supabase_client.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/entities/chat_message_entity.dart';
 import '../providers/chat_providers.dart';
 
@@ -56,9 +57,13 @@ class _ChatTabState extends ConsumerState<ChatTab> {
   Future<void> _startSession() async {
     final userId = supabase.auth.currentUser?.id;
     if (userId == null) return;
-    await ref
-        .read(chatNotifierProvider.notifier)
-        .initSession(userId, topic: _topics.first);
+    final user = ref.read(currentUserProvider).valueOrNull;
+    final level = user?.level ?? 'A1';
+    await ref.read(chatNotifierProvider.notifier).initSession(
+          userId,
+          topic: _topics.first,
+          userLevel: level,
+        );
   }
 
   Future<void> _sendText() async {
@@ -125,9 +130,13 @@ class _ChatTabState extends ConsumerState<ChatTab> {
   Future<void> _changeTopic(String topic) async {
     final userId = supabase.auth.currentUser?.id;
     if (userId == null) return;
-    await ref
-        .read(chatNotifierProvider.notifier)
-        .initSession(userId, topic: topic);
+    final user = ref.read(currentUserProvider).valueOrNull;
+    final level = user?.level ?? 'A1';
+    await ref.read(chatNotifierProvider.notifier).initSession(
+          userId,
+          topic: topic,
+          userLevel: level,
+        );
   }
 
   void _showTopicPicker() {

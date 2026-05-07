@@ -292,7 +292,7 @@ class _FlashcardFace extends StatelessWidget {
 }
 
 // ── Completion screen ───────────────────────────────────────────────────────
-class _CompletionScreen extends StatelessWidget {
+class _CompletionScreen extends ConsumerWidget {
   const _CompletionScreen({
     required this.deckTitle,
     required this.reviewedCount,
@@ -304,7 +304,7 @@ class _CompletionScreen extends StatelessWidget {
   final VoidCallback onBack;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final hasCards = reviewedCount > 0;
     return Scaffold(
       body: SafeArea(
@@ -336,22 +336,23 @@ class _CompletionScreen extends StatelessWidget {
                     height: 1.5),
               ),
               const Spacer(),
-              GestureDetector(
-                onTap: onBack,
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  decoration: BoxDecoration(
-                    color: AppColors.textPrimary,
+              ElevatedButton(
+                onPressed: () {
+                  ref.read(cardProgressNotifier.notifier).reset();
+                  context.go('/decks');
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.textPrimary,
+                  minimumSize: const Size(double.infinity, 56),
+                  shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Text('Volver',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600)),
                 ),
+                child: const Text('Volver',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600)),
               ),
             ],
           ),
